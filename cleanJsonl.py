@@ -1,3 +1,4 @@
+from __future__ import annotations
 import json
 import re
 import shutil
@@ -9,6 +10,17 @@ TEXT_KEYS = (
     "description", "problem", "prompt", "question",
     "name", "input", "text", "query", "instruction"
 )
+PLACEHOLDER_TAGS = re.compile(r"^tag\d+$", re.IGNORECASE)
+
+
+def unescape_captured(s: str) -> str:
+    # Broken JSON often has literal newlines/tabs; escape them so json.loads can parse.
+    repaired = re.sub(r"[\x00-\x1f]", lambda m: f"\\u{ord(m.group(0)):04x}", s)
+    try:
+        return json.loads(f'"{repaired}"')
+    except json.JSONDecodeError:
+        return s.strip()
+
 
 def extract_from_dict(obj: dict) -> str | None:
     for key in TEXT_KEYS:
@@ -48,7 +60,7 @@ def clean_question(q: str) -> str | None:
     for key in TEXT_KEYS:
         m = re.search(rf'"{key}"\s*:\s*"((?:\\.|[^"\\])*)"', qs)
         if m and len(m.group(1).strip()) > 15:
-            return m.group(1).encode().decode("unicode_escape")
+            return unescape_captured(m.group(1))
         
     #{"Actual question text..."}
     if '":' not in qs[:60]:
@@ -57,6 +69,46 @@ def clean_question(q: str) -> str | None:
             return inner
         
     return None
+
+
+def clean_answer(result: dict) -> str | None:
+        
+    answer = (result["answer"] or "").strip()
+
+    if not answer:
+        return None
+
+    if answer.startswith(("{", "[")):
+        try:
+            json.loads(answer)
+        except json.JSONDecodeError:
+            return None
+
+    return answer
+    
+def clean_tags(result: dict) -> list[str]:
+    cleaned = []
+    seen = set()
+    tags = result.get("tags")
+    
+    for tag in tags:
+        if not isinstance(tag, str):
+            continue
+        t = tag.strip()
+        if not t:
+            continue
+        if PLACEHOLDER_TAGS.fullmatch(t):
+            continue
+        if t.lower() in {"tag", "tags", "n/a", "none", "null"}:
+            continue
+        
+        key = t.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        cleaned.append(t)
+    return cleaned
+
 
 shutil.copy(INPUT_FILE, BACKUP_FILE)
 
@@ -68,14 +120,18 @@ with open(BACKUP_FILE, encoding="utf-8") as f:
         if not line:
             continue
         item = json.loads(line)
-        original = item.get("question", "")
-        cleaned = clean_question(original)
-        if cleaned is None:
+        question = item.get("question")
+        answer = clean_answer(item)
+        tags = clean_tags(item)
+        cleaned_question = clean_question(question)
+        if not cleaned_question or not answer:
             removed += 1
             continue
-        if cleaned != original:
+        if cleaned_question != question:
             rewritten += 1
-            item["question"] = cleaned
+        item["question"] =  cleaned_question
+        item["answer"] = answer
+        item["tags"] = tags
         kept.append(item)
         
 with open(INPUT_FILE, "w", encoding="utf-8") as f:
