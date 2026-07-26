@@ -26,7 +26,7 @@ def next_id(path: str) -> int:
 
 dataset_path = "datasets/raw/interviews.jsonl"
 
-CUSTOM_TARGET = 200
+CUSTOM_TARGET = 5000 - 3646
 
 current_id = next_id(dataset_path)
 generator = InterviewGenerator(current_id=current_id, max_retries=20)

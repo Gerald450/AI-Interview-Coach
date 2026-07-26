@@ -1,0 +1,9 @@
+# Dataset generation (Interview_dataset_pipeline)
+ollama>=0.6.2
+pydantic>=2.13.4
+rich>=15.0.0
+
+# Embeddings + retrieval (embed.py, testRetrival.py)
+sentence-transformers>=3.0.0
+faiss-cpu>=1.8.0
+numpy>=1.26.0
