@@ -1,6 +1,8 @@
 from sentence_transformers import SentenceTransformer
 import faiss
 import json
+from ollama import chat
+from rich import print
 
 
 
@@ -16,7 +18,7 @@ with open("Interview_dataset_pipeline/datasets/metadata.json") as f:
     metadata = json.load(f)
     
     
-query = ["Explain AI Tokens", "What is dependency injections"]
+query = ["What is a load balancer?"]
 
 query_embedding = model.encode(
     query,
@@ -27,6 +29,8 @@ k = 5
 print("Searching....")
 faiss.omp_set_num_threads(1)
 scores, indices = index.search(query_embedding, k)
+retrived_examples = []
+context = ""
 
 
 # print(scores)
@@ -34,10 +38,35 @@ scores, indices = index.search(query_embedding, k)
 # print(indices)
 
 for i in range(len(scores)):
-    print("query: ",query[i])
     for score, idx in zip(scores[i], indices[i]):
-        print("=" * 100)
-        print("Similarity:", score)
-        print(metadata[idx]["question"])
-    print('='*100)
-    print('='*100)
+        context += f"""
+        Question: {metadata[idx]["question"]}
+        Answer: {metadata[idx]["answer"]}
+        """
+
+prompt = f"""
+You are an expert software engineering interview coach.
+
+Use the interview examples below as reference.
+
+{context}
+
+Now answer this interview question:
+
+{query}
+
+Give a detailed but concise interview-quality answer.
+"""
+
+print("Waiting for ollama response....")
+response = chat(
+    model = "llama3.2:1b",
+    messages=[
+        {
+            "role": "user",
+            "content":prompt,
+        }
+    ]
+)
+
+print(response["message"]["content"])

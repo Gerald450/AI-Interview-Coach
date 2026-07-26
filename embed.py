@@ -49,4 +49,5 @@ index.add(embeddings)
 
 print('Saving index to file....')
 faiss.write_index(index, "Interview_dataset_pipeline/datasets/interview.index")
+print("Done!")
 

@@ -26,7 +26,7 @@ def next_id(path: str) -> int:
 
 dataset_path = "datasets/raw/interviews.jsonl"
 
-CUSTOM_TARGET = 5000 - 3646
+CUSTOM_TARGET = 5
 
 current_id = next_id(dataset_path)
 generator = InterviewGenerator(current_id=current_id, max_retries=20)
@@ -42,3 +42,4 @@ while saved < CUSTOM_TARGET:
         saved += 1
         print(f"Saved {saved}/{CUSTOM_TARGET}: id={result.id}")
         print("=" * 100)
+print("Done!")
