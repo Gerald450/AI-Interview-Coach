@@ -10,6 +10,8 @@ checkpoint = "BAAI/bge-base-en-v1.5"
 path = Path("Interview_dataset_pipeline/datasets/raw/interviews.jsonl")
 
 
+
+
 print("loading model......")
 model = SentenceTransformer(checkpoint)
 
