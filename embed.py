@@ -3,9 +3,12 @@ from rich import print
 import numpy as np
 import json
 import faiss
+from pathlib import Path
 
 
 checkpoint = "BAAI/bge-base-en-v1.5"
+path = Path("Interview_dataset_pipeline/datasets/raw/interviews.jsonl")
+
 
 print("loading model......")
 model = SentenceTransformer(checkpoint)
@@ -14,8 +17,8 @@ texts = []
 metadata = []
 
 #read jsonl
-print("readind dataset....")
-with open("interviews.jsonl" , "r", encoding="utf-8") as f:
+print("reading dataset....")
+with path.open("r", encoding="utf-8") as f:
     for line in f:
         item = json.loads(line)
         texts.append(item["question"])
@@ -30,10 +33,10 @@ embeddings = model.encode(
     normalize_embeddings=True
 ).astype('float32')
 
-np.save("embeddings.npy", embeddings)
+np.save("Interview_dataset_pipeline/datasets/embeddings.npy", embeddings)
 
 print('Saving metadata to json file.....')
-with open("metadata.json", "w") as f:
+with open("Interview_dataset_pipeline/datasets/metadata.json", "w") as f:
     json.dump(metadata, f, indent=2)
     
 
@@ -45,5 +48,5 @@ print('Indexing embeddings....')
 index.add(embeddings)
 
 print('Saving index to file....')
-faiss.write_index(index, "interview.index")
+faiss.write_index(index, "Interview_dataset_pipeline/datasets/interview.index")
 

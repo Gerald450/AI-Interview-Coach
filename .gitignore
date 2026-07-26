@@ -4,6 +4,8 @@ venv/
 env/
 .env/
 ENV/
+interview_coach/
+**/interview_coach/
 
 # Environment / secrets
 .env

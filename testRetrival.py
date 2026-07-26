@@ -9,10 +9,10 @@ print("Loading model.....")
 model = SentenceTransformer(checkpoint)
 
 print("Loading Index.....")
-index = faiss.read_index("interview.index")
+index = faiss.read_index("Interview_dataset_pipeline/datasets/interview.index")
 
 print("Loading metadata.....")
-with open("metadata.json") as f:
+with open("Interview_dataset_pipeline/datasets/metadata.json") as f:
     metadata = json.load(f)
     
     
@@ -33,8 +33,11 @@ scores, indices = index.search(query_embedding, k)
 # print("="*100)
 # print(indices)
 
-
-for score, idx in zip(scores[0], indices[0]):
-    print("=" * 100)
-    print("Similarity:", score)
-    print(metadata[idx]["question"])
+for i in range(len(scores)):
+    print("query: ",query[i])
+    for score, idx in zip(scores[i], indices[i]):
+        print("=" * 100)
+        print("Similarity:", score)
+        print(metadata[idx]["question"])
+    print('='*100)
+    print('='*100)
