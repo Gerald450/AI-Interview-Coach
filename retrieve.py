@@ -9,6 +9,11 @@ from rich import print
 checkpoint = "BAAI/bge-base-en-v1.5"
 print("Loading model.....")
 model = SentenceTransformer(checkpoint)
+print("Loading Index.....")
+index = faiss.read_index("Interview_dataset_pipeline/datasets/interview.index")
+print("Loading metadata.....")
+with open("Interview_dataset_pipeline/datasets/metadata.json") as f:
+    metadata = json.load(f)
 
 
 class ProcessQuery:
@@ -16,17 +21,6 @@ class ProcessQuery:
         self.query = query
 
     def generate(self,) -> str:
-        checkpoint = "BAAI/bge-base-en-v1.5"
-        print("Loading model.....")
-        model = SentenceTransformer(checkpoint)
-        print("Loading Index.....")
-        index = faiss.read_index("Interview_dataset_pipeline/datasets/interview.index")
-
-        print("Loading metadata.....")
-        with open("Interview_dataset_pipeline/datasets/metadata.json") as f:
-            metadata = json.load(f)
-            
-            
         query = [self.query]
 
         query_embedding = model.encode(
@@ -72,5 +66,6 @@ class ProcessQuery:
                 }
             ]
         )
+        print("Done!")
 
         return response["message"]["content"]

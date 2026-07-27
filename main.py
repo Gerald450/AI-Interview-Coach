@@ -5,12 +5,10 @@ from retrieve import ProcessQuery
 
 class Question(BaseModel):
     question: str
-    
-
 
 app = FastAPI()
 
-@app.post("/")
-def getUserQuestion(question: Question):
-    response = ProcessQuery(question.question)
+@app.post("/ask")
+def answer_question(body: Question):
+    response = ProcessQuery(body.question)
     return response.generate()

@@ -24,9 +24,9 @@ def next_id(path: str) -> int:
     return json.loads(last)["id"] + 1 if last else 1
 
 
-dataset_path = "datasets/raw/interviews.jsonl"
+dataset_path = "datasets/raw/interviewsForTraining.jsonl"
 
-CUSTOM_TARGET = 5
+CUSTOM_TARGET = 10
 
 current_id = next_id(dataset_path)
 generator = InterviewGenerator(current_id=current_id, max_retries=20)
