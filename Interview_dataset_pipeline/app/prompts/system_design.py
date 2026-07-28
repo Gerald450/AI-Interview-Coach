@@ -32,6 +32,7 @@ Answer Requirements:
 - Discuss trade-offs.
 - Explain design decisions.
 - No diagrams.
+-300-600 words
 
 Return ONLY valid JSON.
 

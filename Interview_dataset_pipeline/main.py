@@ -1,15 +1,16 @@
-from turtle import towards
-from app.models.interview import (
-    InterviewExample,
-    Difficulty,
-    Category,
-)
-from app.generators.interview_generator import InterviewGenerator
-from rich import print
-from app.storage.jsonl_writer import JSONLWriter
-from app.config import TARGET_DATASET_SIZE
 import json
 from pathlib import Path
+from turtle import towards
+
+from app.config import TARGET_DATASET_SIZE
+from app.generators.interview_generator import InterviewGenerator
+from app.models.interview import (
+    Category,
+    Difficulty,
+    InterviewExample,
+)
+from app.storage.jsonl_writer import JSONLWriter
+from rich import print
 
 
 def next_id(path: str) -> int:
@@ -24,9 +25,9 @@ def next_id(path: str) -> int:
     return json.loads(last)["id"] + 1 if last else 1
 
 
-dataset_path = "datasets/raw/interviewsForTraining.jsonl"
+dataset_path = "datasets/raw/GeminiDataset.jsonl"
 
-CUSTOM_TARGET = 10
+CUSTOM_TARGET = 50
 
 current_id = next_id(dataset_path)
 generator = InterviewGenerator(current_id=current_id, max_retries=20)

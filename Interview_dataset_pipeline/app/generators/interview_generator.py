@@ -1,15 +1,17 @@
+import random
 from datetime import datetime, timezone
 from json import JSONDecodeError
-from pydantic import Json, ValidationError
-from app.generators.llm_client import LLMClient
-from app.models.interview import Category, Difficulty, InterviewExample, JudgeExample
+
 from app.config import (
     CATEGORIES,
     DIFFICULTIES,
 )
-import random
+from app.generators.llm_client import LLMClient
+from app.models.interview import Category, Difficulty, InterviewExample, JudgeExample
 from app.prompts.judge import build_judge_prompt
 from app.utils.qualityError import QualityError
+from pydantic import ValidationError
+from rich import print
 
 
 class InterviewGenerator:
@@ -28,7 +30,7 @@ class InterviewGenerator:
         for attempt in range(1, self.max_retries + 1):
             try:
                 data = self.client.generate(category=category, difficulty=difficulty)
-
+                print(data)
                 interview = InterviewExample(
                     id=self.current_id,
                     question=data["question"],
@@ -39,27 +41,33 @@ class InterviewGenerator:
                     tags=data.get("tags", []),
                     created_at=datetime.now(timezone.utc),
                 )
-                print("judging.....")
-                prompt = build_judge_prompt(category, difficulty, data["question"], data["answer"])
-                judge = LLMClient("llama3.2:1b", prompt)
-                judge_data = judge.generate(category, difficulty)
-                
-                verdict = JudgeExample(
-                    Score=judge_data["Score"],
-                    Pass = judge_data["Pass"],
-                    Reason= judge_data["Reason"]
-                )
-                
-                if not verdict.Pass or verdict.Score < 50:
-                    raise QualityError(verdict.Reason, verdict.Score)
-                print("done judging")
+                # print("judging.....")
+                # judge_data = self.client.judge(interview)
+
+                # verdict = JudgeExample(
+                #     Score=judge_data["Score"],
+                #     Pass=judge_data["Pass"],
+                #     Reason=judge_data["Reason"],
+                # )
+
+                # print("Verdict: ", verdict)
+
+                # if not verdict.Pass or verdict.Score < 50:
+                #     raise QualityError(verdict.Reason, verdict.Score)
+                # print("done judging")
                 # judge
                 # get the score
-                #if low score raise error
+                # if low score raise error
                 self.current_id += 1
-                
+
                 return interview
-            except (ValidationError, JSONDecodeError, KeyError, TypeError, QualityError) as error:
+            except (
+                ValidationError,
+                JSONDecodeError,
+                KeyError,
+                TypeError,
+                QualityError,
+            ) as error:
                 last_error = error
                 print(f"Attempt {attempt} failed {error}")
                 print("=" * 100)
