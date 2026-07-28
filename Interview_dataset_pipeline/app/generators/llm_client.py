@@ -6,17 +6,20 @@ from app.models.interview import Category, Difficulty, InterviewExample
 from app.prompts.judge import build_judge_prompt
 from dotenv import load_dotenv
 from google import genai
+from groq import Groq
+from rich import print
 
 load_dotenv()
 
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
+GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 
 class LLMClient:
-    def __init__(self, model: str = "gemini-3.6-flash"):
+    def __init__(self, model: str = "openai/gpt-oss-20b"):
         self.model = model
-        self.client = genai.Client(api_key=GEMINI_API_KEY)
+        self.client = Groq(api_key=GROQ_API_KEY)
 
     def generate(
         self,
@@ -26,17 +29,13 @@ class LLMClient:
 
         prompt = PromptBuilder.build(category=category, difficulty=difficulty)
 
-        response = self.client.models.generate_content(
+        response = self.client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
             model=self.model,
-            contents={"text": prompt},
-            config={
-                "temperature": 1,
-                "top_k": 20,
-                "top_p": 0.95,
-            },
+            response_format={"type": "json_object"},
         )
 
-        return json.loads(response.candidates[0].content.parts[0].text)
+        return json.loads(response.choices[0].message.content)
 
     def judge(self, interview: InterviewExample) -> dict:
         prompt = build_judge_prompt(
@@ -46,14 +45,10 @@ class LLMClient:
             interview.answer,
         )
 
-        response = self.client.models.generate_content(
+        response = self.client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
             model=self.model,
-            contents={"text": prompt},
-            config={
-                "temperature": 0,
-                "top_k": 20,
-                "top_p": 0.95,
-            },
+            response_format={"type": "json_object"},
         )
 
-        return json.loads(response.candidates[0].content.parts[0].text)
+        return json.loads(response.choices[0].message.content)

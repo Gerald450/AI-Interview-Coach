@@ -30,7 +30,6 @@ class InterviewGenerator:
         for attempt in range(1, self.max_retries + 1):
             try:
                 data = self.client.generate(category=category, difficulty=difficulty)
-                print(data)
                 interview = InterviewExample(
                     id=self.current_id,
                     question=data["question"],
@@ -52,12 +51,10 @@ class InterviewGenerator:
 
                 # print("Verdict: ", verdict)
 
-                # if not verdict.Pass or verdict.Score < 50:
+                # if not verdict.Pass or verdict.Score < 85:
                 #     raise QualityError(verdict.Reason, verdict.Score)
                 # print("done judging")
-                # judge
-                # get the score
-                # if low score raise error
+
                 self.current_id += 1
 
                 return interview

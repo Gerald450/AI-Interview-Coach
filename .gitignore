@@ -56,5 +56,5 @@ Thumbs.db
 # Jupyter
 .ipynb_checkpoints/
 
-#evinromental variables
-.env
+# test files
+test/

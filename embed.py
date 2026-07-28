@@ -1,15 +1,13 @@
-from sentence_transformers import SentenceTransformer
-from rich import print
-import numpy as np
 import json
-import faiss
 from pathlib import Path
 
+import faiss
+import numpy as np
+from rich import print
+from sentence_transformers import SentenceTransformer
 
 checkpoint = "BAAI/bge-base-en-v1.5"
-path = Path("Interview_dataset_pipeline/datasets/raw/interviews.jsonl")
-
-
+path = Path("Interview_dataset_pipeline/datasets/raw/GeminiDataset.jsonl")
 
 
 print("loading model......")
@@ -18,7 +16,7 @@ model = SentenceTransformer(checkpoint)
 texts = []
 metadata = []
 
-#read jsonl
+# read jsonl
 print("reading dataset....")
 with path.open("r", encoding="utf-8") as f:
     for line in f:
@@ -32,24 +30,23 @@ embeddings = model.encode(
     batch_size=100,
     show_progress_bar=True,
     convert_to_numpy=True,
-    normalize_embeddings=True
-).astype('float32')
+    normalize_embeddings=True,
+).astype("float32")
 
 np.save("Interview_dataset_pipeline/datasets/embeddings.npy", embeddings)
 
-print('Saving metadata to json file.....')
+print("Saving metadata to json file.....")
 with open("Interview_dataset_pipeline/datasets/metadata.json", "w") as f:
     json.dump(metadata, f, indent=2)
-    
 
-#index embeddings  
+
+# index embeddings
 dimension = embeddings.shape[1]
-index = faiss.IndexFlatIP(dimension) #create empty index file with same dimension
+index = faiss.IndexFlatIP(dimension)  # create empty index file with same dimension
 
-print('Indexing embeddings....')
+print("Indexing embeddings....")
 index.add(embeddings)
 
-print('Saving index to file....')
+print("Saving index to file....")
 faiss.write_index(index, "Interview_dataset_pipeline/datasets/interview.index")
 print("Done!")
-

@@ -27,12 +27,11 @@ def next_id(path: str) -> int:
 
 dataset_path = "datasets/raw/GeminiDataset.jsonl"
 
-CUSTOM_TARGET = 50
 
 current_id = next_id(dataset_path)
+CUSTOM_TARGET = 5000 - current_id
 generator = InterviewGenerator(current_id=current_id, max_retries=20)
 writer = JSONLWriter(dataset_path)
-result = generator.generate_random()
 
 
 saved = 0
