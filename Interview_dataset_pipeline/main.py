@@ -25,7 +25,7 @@ def next_id(path: str) -> int:
     return json.loads(last)["id"] + 1 if last else 1
 
 
-dataset_path = "datasets/raw/GeminiDataset.jsonl"
+dataset_path = "datasets/raw/api_dataset.jsonl"
 
 
 current_id = next_id(dataset_path)
