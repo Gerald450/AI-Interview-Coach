@@ -55,3 +55,17 @@ def write_jsonl(path: Path, rows: list[dict]) -> None:
 
 write_jsonl(Path(f"{output_dir}/train.jsonl"), train)
 write_jsonl(Path(f"{output_dir}/val.jsonl"), val)
+
+
+# load to huggingface
+from datasets import load_dataset
+
+dataset = load_dataset(
+    "json",
+    data_files={
+        "train": "Interview_dataset_pipeline/datasets/processed/train.jsonl",
+        "validation": "Interview_dataset_pipeline/datasets/processed/val.jsonl",
+    },
+)
+
+dataset.push_to_hub("shimogerald/interview-coach-dataset")

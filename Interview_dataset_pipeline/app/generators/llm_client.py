@@ -17,7 +17,7 @@ GROQ_API_KEY = os.environ["GROQ_API_KEY"]
 
 
 class LLMClient:
-    def __init__(self, model: str = "openai/gpt-oss-120b"):
+    def __init__(self, model: str = "llama-3.1-8b-instant"):
         self.model = model
         self.client = Groq(api_key=GROQ_API_KEY)
 

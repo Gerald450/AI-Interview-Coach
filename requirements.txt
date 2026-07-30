@@ -2,8 +2,25 @@
 ollama>=0.6.2
 pydantic>=2.13.4
 rich>=15.0.0
+python-dotenv>=1.0.0
+groq>=0.9.0
+google-genai>=1.0.0
 
-# Embeddings + retrieval (embed.py, testRetrival.py)
+# Embeddings + retrieval (embed.py, retrieve.py)
 sentence-transformers>=3.0.0
 faiss-cpu>=1.8.0
 numpy>=1.26.0
+
+# API (main.py)
+fastapi>=0.115.0
+
+# Dataset prep + Hub upload (preprocess_dataset.py)
+datasets>=3.0.0
+
+# Fine-tuning (finetune.py)
+# Unsloth pulls torch/transformers/accelerate; pin them for clarity.
+# On GPU, install a CUDA build of torch from https://pytorch.org first if needed.
+unsloth>=2025.1.0
+torch>=2.4.0
+transformers>=4.45.0
+accelerate>=1.0.0
