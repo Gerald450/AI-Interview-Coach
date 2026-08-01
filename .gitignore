@@ -58,3 +58,7 @@ Thumbs.db
 
 # test files
 test/
+
+#HFcards
+HFDataset.md
+HFModel.md

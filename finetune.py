@@ -59,6 +59,9 @@ model, tokenizer = FastLanguageModel.from_pretrained(
     load_in_4bit=True,
 )
 
+if tokenizer.pad_token is None:
+    tokenizer.pad_token = tokenizer.eos_token
+
 """
 PEFT- Parameter Efficient Fine Tuning, 
 LoRA - Low Rank Adaptation(adds sticky notes on parameters that need adjusting)
@@ -68,7 +71,7 @@ alpha - how loud the Lora changes are mixed with original weights
 dropout - randomly turn off some connections during training to avoid overfitting
 0 means dont do that, for smaller datasets
 """
-model = FastLanguageModel.getpeft_model(
+model = FastLanguageModel.get_peft_model(
     model,
     r=16,
     target_modules=[
@@ -100,7 +103,7 @@ def tokenize(batch):
         for messages in batch["messages"]
     ]
 
-    return tokenizer(texts)
+    return tokenizer(texts, truncation=True, max_length=2048)
 
 
 tokenized_dataset = dataset.map(
@@ -115,7 +118,7 @@ data_collator = DataCollatorForLanguageModeling(
 
 # setup dataloaders
 train_loader = DataLoader(
-    tokenized_dataset["train"], shuffle=True, batch_size=10, collate_fn=data_collator
+    tokenized_dataset["train"], shuffle=True, batch_size=2, collate_fn=data_collator
 )
 
 eval_loader = DataLoader(
@@ -126,7 +129,7 @@ eval_loader = DataLoader(
 )
 
 # optimizer
-optimizer = AdamW(model.parameters(), lr_rate=2e-4, weight_decay=0.01)
+optimizer = AdamW(model.parameters(), lr=2e-4, weight_decay=0.01)
 
 # use accelerator
 model, optimizer, train_loader, eval_loader = accelerator.prepare(
@@ -188,4 +191,14 @@ if accelerator.is_main_process:
         f"eval_loss= {avg_loss:.4f} perplexity={torch.exp(torch.tensor(avg_loss)):.2f}"
     )
 
-spot_check(model, tokenizer, dataset, accelerator, n_samples=5)
+spot_check(model, tokenizer, dataset, accelerator, num_samples=10)
+
+repo_id = "shimogerald/lora_interview_coach"
+
+# PEFT/Unsloth LoRA adapter
+accelerator.wait_for_everyone()
+unwrapped = accelerator.unwrap_model(model)
+
+if accelerator.is_main_process:
+    unwrapped.push_to_hub(repo_id)
+    tokenizer.push_to_hub(repo_id)

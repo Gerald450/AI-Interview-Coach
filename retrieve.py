@@ -1,10 +1,9 @@
-from sentence_transformers import SentenceTransformer
-import faiss
 import json
+
+import faiss
 from ollama import chat
 from rich import print
-
-
+from sentence_transformers import SentenceTransformer
 
 checkpoint = "BAAI/bge-base-en-v1.5"
 print("Loading model.....")
@@ -20,13 +19,14 @@ class ProcessQuery:
     def __init__(self, query) -> None:
         self.query = query
 
-    def generate(self,) -> str:
+    def generate(
+        self,
+    ) -> str:
         query = [self.query]
 
-        query_embedding = model.encode(
-            query,
-            normalize_embeddings=True
-        ).astype("float32")
+        query_embedding = model.encode(query, normalize_embeddings=True).astype(
+            "float32"
+        )
 
         k = 5
         print("Searching....")
@@ -34,10 +34,15 @@ class ProcessQuery:
         scores, indices = index.search(query_embedding, k)
         context = ""
 
+        # for i in range(len(scores)):
+        #     for score, idx in zip(scores[i], indices[i]):
+        #         context += f"""
+        #         Question: {metadata[idx]["question"]}
+        #         Answer: {metadata[idx]["answer"]}
+        #         """
 
-        for i in range(len(scores)):
-            for score, idx in zip(scores[i], indices[i]):
-                context += f"""
+        for idx in indices:
+            context += f"""
                 Question: {metadata[idx]["question"]}
                 Answer: {metadata[idx]["answer"]}
                 """
@@ -58,13 +63,13 @@ class ProcessQuery:
 
         print("Waiting for ollama response....")
         response = chat(
-            model = "llama3.2:1b",
+            model="llama3.2:1b",
             messages=[
                 {
                     "role": "user",
-                    "content":prompt,
+                    "content": prompt,
                 }
-            ]
+            ],
         )
         print("Done!")
 
