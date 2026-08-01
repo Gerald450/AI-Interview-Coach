@@ -105,3 +105,9 @@ class InterviewExample(BaseModel):
     tags: list[str] = Field(default_factory=list)
     
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    
+    
+class JudgeExample(BaseModel):
+    Score: int
+    Pass: bool
+    Reason: str

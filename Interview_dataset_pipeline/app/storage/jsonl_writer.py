@@ -1,9 +1,10 @@
 from __future__ import annotations
-import json
-from pathlib import Path
-from app.models.interview import InterviewExample
-import re
 
+import json
+import re
+from pathlib import Path
+
+from app.models.interview import InterviewExample
 
 TEXT_KEYS = (
     "description",
@@ -18,8 +19,10 @@ TEXT_KEYS = (
 )
 PLACEHOLDER_TAGS = re.compile(r"^tag\d+$", re.IGNORECASE)
 
+
 def _normalize_question(q: str) -> str:
     return "".join(q.lower().split())
+
 
 class JSONLWriter:
     def __init__(self, output_path: str) -> None:
@@ -27,7 +30,7 @@ class JSONLWriter:
         # if directory dont exist, create it, if it does dont throw error
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
         self._seen = self._load_seen()
-        
+
     def _load_seen(self) -> set[str]:
         seen: set[str] = set[str]()
         if not self.output_path.exists():
@@ -43,30 +46,28 @@ class JSONLWriter:
         return seen
 
     def write(self, interview: InterviewExample) -> bool:
-        
+
         result = interview.model_dump(
             mode="json"
         )  # model_dump: dict, mode: json friendly
         question = self.clean_question(result)
         answer = self.clean_answer(result)
-        
+
         if not question or not answer:
             return False
         key = _normalize_question(question)
-        
+
         if key in self._seen:
             print(f"duplicate skipped: {question[:80]!r}")
             return False
-        
-        
-        result['question'] = question
+
+        result["question"] = question
         result["answer"] = answer
         result["tags"] = self.clean_tags(result)
 
         with self.output_path.open("a", encoding="utf-8") as f:
             f.write(
-                json.dumps(result, ensure_ascii=False)
-                + "\n"  # dumps: json string,
+                json.dumps(result, ensure_ascii=False) + "\n"  # dumps: json string,
             )
         self._seen.add(key)
         return True
@@ -79,6 +80,7 @@ class JSONLWriter:
                 return json.loads(f'"{repaired}"')
             except json.JSONDecodeError:
                 return s.strip()
+
         def extract_from_dict(obj: dict) -> str | None:
             for key in TEXT_KEYS:
                 val = obj.get(key)
@@ -138,10 +140,9 @@ class JSONLWriter:
         else:
             print(f"Cannot clean {result['question']}")
             return None
-        
-        
+
     def clean_answer(self, result: dict) -> str | None:
-        
+
         answer = (result["answer"] or "").strip()
 
         if not answer:
@@ -155,12 +156,12 @@ class JSONLWriter:
                 return None
 
         return answer
-    
+
     def clean_tags(self, result: dict) -> list[str]:
         cleaned = []
         seen = set()
         tags = result.get("tags")
-        
+
         for tag in tags:
             if not isinstance(tag, str):
                 continue
@@ -171,7 +172,7 @@ class JSONLWriter:
                 continue
             if t.lower() in {"tag", "tags", "n/a", "none", "null"}:
                 continue
-            
+
             key = t.lower()
             if key in seen:
                 continue

@@ -2,20 +2,108 @@ from app.models.interview import (
     Category,
     Difficulty,
 )
+from app.utils.difficultyGuide import DIFFICULTY_GUIDE
+from app.prompts.coding import build_coding_prompt
+from app.prompts.behavioral import build_behavioral_prompt
+from app.prompts.programming import build_programming_prompt
+from app.prompts.database import build_database_prompt
+from app.prompts.systems import build_systems_prompt
+from app.prompts.system_design import build_system_design_prompt
+from app.prompts.backend import build_backend_prompt
+from app.prompts.cloud import build_cloud_prompt
+from app.prompts.ai import build_ai_prompt
+from app.prompts.career import build_career_prompt
+from app.prompts.general import build_general_prompt
 
-DIFFICULTY_GUIDE = {
-    Difficulty.EASY: (
-        "A warm-up a competent junior answers in under a minute. "
-        "Tests one core definition or a single well-known technique."
-    ),
-    Difficulty.MEDIUM: (
-        "Requires connecting two or more ideas, or reasoning about a trade-off. "
-        "Typical of a mid-level phone screen."
-    ),
-    Difficulty.HARD: (
-        "Requires deep reasoning, edge cases, or scale and trade-off analysis. "
-        "Typical of a senior on-site round."
-    ),
+
+# Behavioral
+BEHAVIORAL_CATEGORIES = {
+    Category.BEHAVIORAL,
+    Category.LEADERSHIP,
+    Category.COMMUNICATION,
+}
+
+# Programming Fundamentals
+PROGRAMMING_CATEGORIES = {
+    Category.PROGRAMMING,
+    Category.OBJECT_ORIENTED_PROGRAMMING,
+}
+
+# Coding / Algorithms
+CODING_CATEGORIES = {
+    Category.ARRAYS,
+    Category.STRINGS,
+    Category.HASH_TABLES,
+    Category.LINKED_LISTS,
+    Category.STACKS,
+    Category.QUEUES,
+    Category.TREES,
+    Category.HEAPS,
+    Category.TRIES,
+    Category.GRAPHS,
+    Category.SORTING,
+    Category.SEARCHING,
+    Category.RECURSION,
+    Category.BACKTRACKING,
+    Category.GREEDY,
+    Category.DYNAMIC_PROGRAMMING,
+    Category.DIVIDE_AND_CONQUER,
+    Category.BIT_MANIPULATION,
+    Category.MATH,
+}
+
+# Databases
+DATABASE_CATEGORIES = {
+    Category.DATABASES,
+    Category.SQL,
+}
+
+# Computer Systems
+SYSTEMS_CATEGORIES = {
+    Category.OPERATING_SYSTEMS,
+    Category.NETWORKING,
+    Category.CONCURRENCY,
+    Category.COMPUTER_ARCHITECTURE,
+}
+
+# System Design
+SYSTEM_DESIGN_CATEGORIES = {
+    Category.SYSTEM_DESIGN,
+    Category.LOW_LEVEL_DESIGN,
+    Category.DESIGN_PATTERNS,
+}
+
+# Backend / Software Engineering
+BACKEND_CATEGORIES = {
+    Category.API_DESIGN,
+    Category.MICROSERVICES,
+    Category.TESTING,
+    Category.SECURITY,
+}
+
+# Cloud / DevOps
+CLOUD_CATEGORIES = {
+    Category.CLOUD_COMPUTING,
+    Category.DEVOPS,
+}
+
+# AI / Machine Learning
+AI_CATEGORIES = {
+    Category.MACHINE_LEARNING,
+    Category.DEEP_LEARNING,
+    Category.NATURAL_LANGUAGE_PROCESSING,
+    Category.COMPUTER_VISION,
+    Category.GENERATIVE_AI,
+    Category.LARGE_LANGUAGE_MODELS,
+    Category.RAG,
+    Category.VECTOR_DATABASES,
+    Category.PROMPT_ENGINEERING,
+}
+
+# Career
+CAREER_CATEGORIES = {
+    Category.RESUME,
+    Category.PROJECTS,
 }
 
 
@@ -25,40 +113,26 @@ class PromptBuilder:
         category: Category,
         difficulty: Difficulty,
     ) -> str:
-        return f"""
-        You are a senior software engineer writing high-quality interview practice material.
-        Write exactly ONE interview question and its model answer.
-        TOPIC
-        - Category: {category.value}
-        - Difficulty: {difficulty.value} — {DIFFICULTY_GUIDE[difficulty]}
-        QUESTION RULES
-        - Phrase it as something an interviewer would actually say out loud, in full sentences.
-        - Make it self-contained. No references to code, data, or context the candidate cannot see.
-        - It must clearly belong to the {category.value} category.
-        - Exactly one question. Do not bundle several questions together.
-        ANSWER RULES
-        - Answer the way a strong candidate would speak: 3 to 6 sentences, roughly 400-900 characters.
-        - Explain the reasoning, not just the conclusion. Never reply with only a final value, a bare
-        expression, a single word, or a fragment of code.
-        - Name the key trade-off, complexity, or failure mode when the topic has one.
-        - Plain prose only. No markdown, no bullet points, no code fences, no JSON, no wrapping quotes.
-        - Describe code in words ("iterate once with a hash map") instead of pasting a program.
-        TAG RULES
-        - Exactly 3 to 5 tags, and never an empty list.
-        - Lowercase, 1 to 3 words, hyphenated when multi-word: "hash-map", "time-complexity".
-        - Name the concrete concepts the question tests. No filler like "interview", "question", "coding".
-        - No duplicates and no near-duplicates of each other.
-        COMPANY RULE
-        - Use null unless the question is genuinely tied to one company's known interview style or product.
-        - Null is correct the large majority of the time.
-        OUTPUT
-        Return ONLY a JSON object with exactly these four keys and nothing else:
-        {{
-        "question": "<string>",
-        "answer": "<string>",
-        "company": null,
-        "tags": ["<string>", "<string>", "<string>"]
-        }}
-        Choose tags only after writing the question. Each tag must describe a concept actually tested by
-        that specific question and must fit the requested {category.value} category.
-        """
+
+        if category in CODING_CATEGORIES:
+            return build_coding_prompt(category, difficulty)
+        elif category in BEHAVIORAL_CATEGORIES:
+            return build_behavioral_prompt(category, difficulty)
+        elif category in PROGRAMMING_CATEGORIES:
+            return build_programming_prompt(category, difficulty)
+        elif category in DATABASE_CATEGORIES:
+            return build_database_prompt(category, difficulty)
+        elif category in SYSTEMS_CATEGORIES:
+            return build_systems_prompt(category, difficulty)
+        elif category in SYSTEM_DESIGN_CATEGORIES:
+            return build_system_design_prompt(category, difficulty)
+        elif category in BACKEND_CATEGORIES:
+            return build_backend_prompt(category, difficulty)
+        elif category in CLOUD_CATEGORIES:
+            return build_cloud_prompt(category, difficulty)
+        elif category in AI_CATEGORIES:
+            return build_ai_prompt(category, difficulty)
+        elif category in CAREER_CATEGORIES:
+            return build_career_prompt(category, difficulty)
+        else:
+            return build_general_prompt(category, difficulty)
